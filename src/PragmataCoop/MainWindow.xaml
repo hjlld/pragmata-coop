@@ -1,0 +1,237 @@
+<Window x:Class="PragmataCoop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PragmataCoop"
+        xmlns:vm="clr-namespace:PragmataCoop.ViewModels"
+        xmlns:conv="clr-namespace:PragmataCoop.Converters"
+        mc:Ignorable="d"
+        Title="PRAGMATA 双人合作助手" Width="520" Height="680"
+        ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        Background="#1E1E1E" Foreground="#E0E0E0"
+        Closed="Window_Closed">
+
+    <Window.Resources>
+        <conv:BoolToColorConverter x:Key="BoolToColor" />
+        <conv:BoolToActiveTextConverter x:Key="BoolToActive" />
+        <conv:StickToLeftConverter x:Key="StickToLeft" />
+        <conv:StickToTopConverter x:Key="StickToTop" />
+
+        <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="#E0E0E0" />
+            <Setter Property="Background" Value="#3D3D3D" />
+            <Setter Property="BorderBrush" Value="#555" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Name="ToggleButton" Focusable="False" ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Background="#3D3D3D" BorderBrush="#555" BorderThickness="1" Padding="6,4">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2">
+                                            <Path x:Name="Arrow" Fill="#999" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                  Data="M 0 0 L 4 4 L 8 0 Z" Margin="0,0,8,0" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              TextBlock.Foreground="#E0E0E0" TextBlock.FontSize="13"
+                                              Margin="10,4,30,4" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                            <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Grid Name="DropDown" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True">
+                                    <Border x:Name="DropDownBorder" Background="#2D2D2D" BorderBrush="#555" BorderThickness="1" CornerRadius="2" />
+                                    <ScrollViewer Margin="4" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="#E0E0E0" />
+            <Setter Property="Background" Value="#2D2D2D" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="2">
+                            <ContentPresenter TextBlock.Foreground="#E0E0E0" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#4A4A4A" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#3A6EA5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DarkButtonStyle" TargetType="Button">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="20,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,6">
+            <TextBlock Text="PRAGMATA 双人合作助手" FontSize="20" FontWeight="Bold"
+                       Foreground="#FFFFFF" HorizontalAlignment="Center" />
+            <TextBlock Text="如果你觉得好玩的话，请帮忙关注我的B站账号" FontSize="12"
+                       Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,4,0,4" />
+            <Image Source="Assets/bilibili_logo.png" Width="180" Height="60"
+                   Cursor="Hand" MouseUp="BilibiliLogo_MouseUp"
+                   ToolTip="点击跳转到B站主页" HorizontalAlignment="Center" />
+        </StackPanel>
+
+        <!-- Controller Status Panel -->
+        <Border Grid.Row="1" CornerRadius="6" Background="#2D2D2D" Padding="12" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="12" Height="12" Margin="0,0,6,0"
+                                 Fill="{Binding Controller1Connected, Converter={StaticResource BoolToColor}}" />
+                        <TextBlock FontWeight="Bold">手柄1 (射击)</TextBlock>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Controller1Status}" FontSize="12" Foreground="#AAAAAA" Margin="18,2,0,2" />
+
+                    <Grid Width="70" Height="70" Margin="18,0,0,0">
+                        <Ellipse Width="70" Height="70" Fill="#1A1A1A" Stroke="#444" StrokeThickness="1" />
+                        <Ellipse Width="10" Height="10" Fill="#4CAF50" RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <TranslateTransform X="{Binding LeftStickX1, Converter={StaticResource StickToLeft}}"
+                                                    Y="{Binding LeftStickY1, Converter={StaticResource StickToTop}}" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <TextBlock Text="LS" FontSize="9" Foreground="#666" HorizontalAlignment="Center"
+                                   VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="18,4,0,0">
+                        <Rectangle Width="{Binding LeftTrigger1}" Height="6" Fill="#FF5722" RadiusX="2" RadiusY="2"
+                                   MaxWidth="80" VerticalAlignment="Center" />
+                        <Rectangle Width="{Binding RightTrigger1}" Height="6" Fill="#FF9800" RadiusX="2" RadiusY="2"
+                                   MaxWidth="80" VerticalAlignment="Center" Margin="2,0,0,0" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Rectangle Grid.Column="1" Width="1" Fill="#444" Margin="12,0" />
+
+                <StackPanel Grid.Column="2">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="12" Height="12" Margin="0,0,6,0"
+                                 Fill="{Binding Controller2Connected, Converter={StaticResource BoolToColor}}" />
+                        <TextBlock FontWeight="Bold">手柄2 (走格子)</TextBlock>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Controller2Status}" FontSize="12" Foreground="#AAAAAA" Margin="18,2,0,2" />
+
+                    <Grid Width="70" Height="70" Margin="18,0,0,0">
+                        <Ellipse Width="70" Height="70" Fill="#1A1A1A" Stroke="#444" StrokeThickness="1" />
+                        <Ellipse Width="10" Height="10" Fill="#9C27B0" RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <TranslateTransform X="{Binding RightStickX2, Converter={StaticResource StickToLeft}}"
+                                                    Y="{Binding RightStickY2, Converter={StaticResource StickToTop}}" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <TextBlock Text="RS" FontSize="9" Foreground="#666" HorizontalAlignment="Center"
+                                   VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="18,8,0,0">
+                        <Rectangle Width="{Binding LeftTrigger2}" Height="6" Fill="#FF5722" RadiusX="2" RadiusY="2" MaxWidth="80" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <Border CornerRadius="4" Background="#333" Padding="6,3" Margin="18,8,0,0" HorizontalAlignment="Left">
+                        <TextBlock FontSize="11">
+                            <Run Text="合作: " Foreground="#AAA" />
+                            <Run Text="{Binding PuzzleModeActive, Converter={StaticResource BoolToActive}}"
+                                 Foreground="#FFD54F" FontWeight="Bold" />
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Preset Selection -->
+        <Border Grid.Row="2" CornerRadius="6" Background="#2D2D2D" Padding="12" Margin="0,0,0,10">
+            <StackPanel>
+                <TextBlock Text="映射方案" FontSize="13" FontWeight="Bold" Foreground="#E0E0E0" Margin="0,0,0,8" />
+                <ComboBox ItemsSource="{x:Static vm:MainViewModel.PresetDisplayNames}"
+                          SelectedIndex="{Binding SelectedPresetIndex}"
+                          Style="{StaticResource DarkComboBoxStyle}"
+                          Height="30" Margin="0,0,0,10" />
+                <TextBlock FontSize="11" Foreground="#888" TextWrapping="Wrap">
+                    手柄2 按住 LT 时启用，释放后手柄1完全控制。
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Start / Stop + Status -->
+        <Border Grid.Row="3" CornerRadius="4" Background="#2D2D2D" Padding="10,8" Margin="0,0,0,0">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                    <Button Content=" 启动 " Width="110" Height="34" Margin="0,0,12,0"
+                            Background="#4CAF50" Style="{StaticResource DarkButtonStyle}"
+                            IsEnabled="{Binding IsStartEnabled}"
+                            Click="StartButton_Click" />
+                    <Button Content=" 停止 " Width="110" Height="34"
+                            Background="#F44336" Style="{StaticResource DarkButtonStyle}"
+                            IsEnabled="{Binding IsRunning}"
+                            Click="StopButton_Click" />
+                </StackPanel>
+                <TextBlock Text="{Binding Status}" FontSize="12" Foreground="#BBBBBB" HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding DetectedSlots}" FontSize="10" Foreground="#888888" HorizontalAlignment="Center" Margin="0,2,0,0" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

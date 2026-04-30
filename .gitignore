@@ -1,0 +1,8 @@
+docs
+REFramework-master
+tools
+**/bin
+src/reframework
+src/XinputProxy
+src/XinputProxyCs
+**/obj
