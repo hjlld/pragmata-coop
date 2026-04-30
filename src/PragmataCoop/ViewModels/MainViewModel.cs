@@ -18,9 +18,10 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly HidHideService _hidHideService;
     private readonly AppSettings _settings;
 
-    private string _status = "请转动爸爸手柄的左摇杆来识别手柄1";
-    private string _controller1Status = "请转动爸爸手柄的左摇杆";
-    private string _controller2Status = "请转动女儿手柄的右摇杆";
+    private string _status = Helpers.Locale.Instance.DetectC1Initial;
+    private string _controller1Status = Helpers.Locale.Instance.DetectC1Prompt;
+    private string _controller2Status = Helpers.Locale.Instance.DetectC2Prompt;
+    private string _selectedLanguage;
     private string _controller1Name = "";
     private string _controller2Name = "";
     private string _detectedSlots = "";
@@ -44,6 +45,7 @@ public class MainViewModel : INotifyPropertyChanged
         _hidHideService = new HidHideService();
         _settings = AppSettings.Load();
         _selectedPresetIndex = (int)_settings.SelectedPreset;
+        _selectedLanguage = Helpers.Locale.Instance.IsChinese ? "Chinese" : "English";
 
         _controllerService.ControllerAssigned += OnControllerAssigned;
         _controllerService.StateUpdated += OnStateUpdated;
@@ -79,19 +81,48 @@ public class MainViewModel : INotifyPropertyChanged
     public byte RightTrigger1 { get => _rightTrigger1; set { _rightTrigger1 = value; OnPropertyChanged(); } }
     public byte LeftTrigger2 { get => _leftTrigger2; set { _leftTrigger2 = value; OnPropertyChanged(); } }
     public byte RightTrigger2 { get => _rightTrigger2; set { _rightTrigger2 = value; OnPropertyChanged(); } }
-    public static string[] PresetDisplayNames { get; } = { "右摇杆", "按键", "混合" };
+    public static string[] PresetDisplayNames => Helpers.Locale.Instance.PresetNames;
+    public Helpers.Locale L => Helpers.Locale.Instance;
+    public string PromoImage => L.PromoImage;
+    public string PromoUrl => L.PromoUrl;
+
+    public string[] Languages { get; } = { "Chinese", "English" };
+    public string SelectedLanguage
+    {
+        get => _selectedLanguage;
+        set
+        {
+            _selectedLanguage = value;
+            Helpers.Locale.Instance.SetLanguage(value);
+            RefreshAllTexts();
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(L)); // Notify XAML bindings
+        }
+    }
     public int SelectedPresetIndex { get => _selectedPresetIndex; set { _selectedPresetIndex = value; OnPropertyChanged(); SaveSettings(); } }
     public MappingPreset CurrentPreset => _selectedPresetIndex switch { 1 => MappingPreset.ButtonsToABXY, 2 => MappingPreset.Combined, _ => MappingPreset.StickToABXY };
     public RelayCommand StartCommand { get; }
     public RelayCommand StopCommand { get; }
+
+    private void RefreshAllTexts()
+    {
+        Status = L.DetectC1Initial;
+        Controller1Status = L.DetectC1Prompt;
+        Controller2Status = L.DetectC2Prompt;
+        UpdateDetectedSlots();
+        OnPropertyChanged(nameof(L));
+        OnPropertyChanged(nameof(PromoImage));
+        OnPropertyChanged(nameof(PromoUrl));
+        OnPropertyChanged(nameof(SelectedPresetIndex));
+    }
 
     private void OnControllerAssigned(string which, int slot)
     {
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(DispatcherPriority.Normal, () =>
         {
             UpdateDetectedSlots();
-            if (which == "C1") { _c1Detected = true; Controller1Connected = true; Controller1Name = $"XInput #{slot}"; Controller1Status = $"已识别 ✓ (槽位 {slot})"; Status = "手柄1已识别 — 请转动女儿手柄的右摇杆"; }
-            else { _c2Detected = true; Controller2Connected = true; Controller2Name = $"XInput #{slot}"; Controller2Status = $"已识别 ✓ (槽位 {slot})"; Status = "两个手柄已识别 — 请点击「启动」"; }
+            if (which == "C1") { _c1Detected = true; Controller1Connected = true; Controller1Name = L.XInputSlotPrefix + slot; Controller1Status = L.DetectC1Done(slot); Status = L.DetectC1Next; }
+            else { _c2Detected = true; Controller2Connected = true; Controller2Name = L.XInputSlotPrefix + slot; Controller2Status = L.DetectC2Done(slot); Status = L.DetectBothDone; }
             OnPropertyChanged(nameof(IsStartEnabled));
             CommandManager.InvalidateRequerySuggested();
         });
@@ -103,7 +134,7 @@ public class MainViewModel : INotifyPropertyChanged
         try { _virtualController.Connect(); _virtualConnected = true;
             try { HidNameHelper.SetControllerName(0x1234, 0x5678, "PragmataVirtualController"); } catch { }
         }
-        catch (Exception ex) { Status = "ViGEm 连接失败: " + ex.Message; _virtualConnected = false; }
+        catch (Exception ex) { Status = L.StatusVigemFail(ex.Message); _virtualConnected = false; }
 
         if (_virtualConnected)
         {
@@ -113,7 +144,7 @@ public class MainViewModel : INotifyPropertyChanged
 
         _controllerService.StartMapping();
         _started = true;
-        Status = "运行中";
+        Status = L.StatusRunning;
         OnPropertyChanged(nameof(IsRunning));
         OnPropertyChanged(nameof(IsStartEnabled));
         CommandManager.InvalidateRequerySuggested();
@@ -124,10 +155,10 @@ public class MainViewModel : INotifyPropertyChanged
         _controllerService.Stop(); _virtualController.Disconnect(); _virtualConnected = false;
         _hidHideService.Deactivate();
         _started = false; _c1Detected = _c2Detected = false;
-        Controller1Status = "请转动爸爸手柄的左摇杆"; Controller2Status = "请转动女儿手柄的右摇杆";
+        Controller1Status = L.DetectC1Prompt; Controller2Status = L.DetectC2Prompt;
         Controller1Connected = false; Controller2Connected = false;
         Controller1Name = ""; Controller2Name = "";
-        Status = "请转动爸爸手柄的左摇杆来识别手柄1";
+        Status = L.DetectC1Initial;
         OnPropertyChanged(nameof(IsRunning)); OnPropertyChanged(nameof(IsStartEnabled));
         CommandManager.InvalidateRequerySuggested();
         _controllerService.StartDetection();
@@ -135,7 +166,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void UpdateDetectedSlots()
     {
-        try { var c = new System.Collections.Generic.List<int>(); for (int i = 0; i < 4; i++) { var (res, _) = XInputNative.GetStateRaw(i); if (res == 0) c.Add(i); } _detectedSlots = c.Count > 0 ? $"XInput: [{string.Join(",", c)}]" : ""; } catch { _detectedSlots = ""; }
+        try { var c = new System.Collections.Generic.List<int>(); for (int i = 0; i < 4; i++) { var (res, _) = XInputNative.GetStateRaw(i); if (res == 0) c.Add(i); }             _detectedSlots = c.Count > 0 ? L.XInputSlots(string.Join(",", c)) : L.DetectNoControllers; } catch { _detectedSlots = ""; }
         OnPropertyChanged(nameof(DetectedSlots));
     }
 

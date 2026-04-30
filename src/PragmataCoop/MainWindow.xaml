@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:PragmataCoop"
         xmlns:vm="clr-namespace:PragmataCoop.ViewModels"
         xmlns:conv="clr-namespace:PragmataCoop.Converters"
+        xmlns:helpers="clr-namespace:PragmataCoop.Helpers"
         mc:Ignorable="d"
-        Title="PRAGMATA 双人合作助手" Width="520" Height="680"
+        Title="{Binding L.WindowTitle}" Width="520" Height="700"
         ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
         Background="#1E1E1E" Foreground="#E0E0E0"
         Closed="Window_Closed">
@@ -119,13 +120,13 @@
 
         <!-- Title -->
         <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,6">
-            <TextBlock Text="PRAGMATA 双人合作助手" FontSize="20" FontWeight="Bold"
+            <TextBlock Text="{Binding L.AppTitle}" FontSize="20" FontWeight="Bold"
                        Foreground="#FFFFFF" HorizontalAlignment="Center" />
-            <TextBlock Text="如果你觉得好玩的话，请帮忙关注我的B站账号" FontSize="12"
+            <TextBlock Text="{Binding L.BilibiliPromo}" FontSize="12"
                        Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,4,0,4" />
-            <Image Source="Assets/bilibili_logo.png" Width="180" Height="60"
-                   Cursor="Hand" MouseUp="BilibiliLogo_MouseUp"
-                   ToolTip="点击跳转到B站主页" HorizontalAlignment="Center" />
+            <Image Source="{Binding PromoImage}" Width="180" Height="60"
+                   Cursor="Hand" MouseUp="PromoImage_MouseUp"
+                   HorizontalAlignment="Center" />
         </StackPanel>
 
         <!-- Controller Status Panel -->
@@ -141,7 +142,7 @@
                     <StackPanel Orientation="Horizontal">
                         <Ellipse Width="12" Height="12" Margin="0,0,6,0"
                                  Fill="{Binding Controller1Connected, Converter={StaticResource BoolToColor}}" />
-                        <TextBlock FontWeight="Bold">手柄1 (射击)</TextBlock>
+                        <TextBlock FontWeight="Bold" Text="{Binding L.Controller1Label}" />
                     </StackPanel>
                     <TextBlock Text="{Binding Controller1Status}" FontSize="12" Foreground="#AAAAAA" Margin="18,2,0,2" />
 
@@ -171,7 +172,7 @@
                     <StackPanel Orientation="Horizontal">
                         <Ellipse Width="12" Height="12" Margin="0,0,6,0"
                                  Fill="{Binding Controller2Connected, Converter={StaticResource BoolToColor}}" />
-                        <TextBlock FontWeight="Bold">手柄2 (走格子)</TextBlock>
+                        <TextBlock FontWeight="Bold" Text="{Binding L.Controller2Label}" />
                     </StackPanel>
                     <TextBlock Text="{Binding Controller2Status}" FontSize="12" Foreground="#AAAAAA" Margin="18,2,0,2" />
 
@@ -193,7 +194,7 @@
 
                     <Border CornerRadius="4" Background="#333" Padding="6,3" Margin="18,8,0,0" HorizontalAlignment="Left">
                         <TextBlock FontSize="11">
-                            <Run Text="合作: " Foreground="#AAA" />
+                            <Run Text="{Binding L.PuzzleLabel, Mode=OneWay}" Foreground="#AAA" />
                             <Run Text="{Binding PuzzleModeActive, Converter={StaticResource BoolToActive}}"
                                  Foreground="#FFD54F" FontWeight="Bold" />
                         </TextBlock>
@@ -205,14 +206,12 @@
         <!-- Preset Selection -->
         <Border Grid.Row="2" CornerRadius="6" Background="#2D2D2D" Padding="12" Margin="0,0,0,10">
             <StackPanel>
-                <TextBlock Text="映射方案" FontSize="13" FontWeight="Bold" Foreground="#E0E0E0" Margin="0,0,0,8" />
-                <ComboBox ItemsSource="{x:Static vm:MainViewModel.PresetDisplayNames}"
+                <TextBlock Text="{Binding L.PresetLabel}" FontSize="13" FontWeight="Bold" Foreground="#E0E0E0" Margin="0,0,0,8" />
+                <ComboBox ItemsSource="{Binding L.PresetNames}"
                           SelectedIndex="{Binding SelectedPresetIndex}"
                           Style="{StaticResource DarkComboBoxStyle}"
                           Height="30" Margin="0,0,0,10" />
-                <TextBlock FontSize="11" Foreground="#888" TextWrapping="Wrap">
-                    手柄2 按住 LT 时启用，释放后手柄1完全控制。
-                </TextBlock>
+                <TextBlock Text="{Binding L.PresetHint}" FontSize="11" Foreground="#888" TextWrapping="Wrap" />
             </StackPanel>
         </Border>
 
@@ -220,17 +219,20 @@
         <Border Grid.Row="3" CornerRadius="4" Background="#2D2D2D" Padding="10,8" Margin="0,0,0,0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
-                    <Button Content=" 启动 " Width="110" Height="34" Margin="0,0,12,0"
-                            Background="#4CAF50" Style="{StaticResource DarkButtonStyle}"
-                            IsEnabled="{Binding IsStartEnabled}"
-                            Click="StartButton_Click" />
-                    <Button Content=" 停止 " Width="110" Height="34"
+            <Button Content="{Binding L.ButtonStart}" Width="110" Height="34" Margin="0,0,12,0"
+                    Background="#4CAF50" Style="{StaticResource DarkButtonStyle}"
+                    IsEnabled="{Binding IsStartEnabled}"
+                    Click="StartButton_Click" />
+            <Button Content="{Binding L.ButtonStop}" Width="110" Height="34"
                             Background="#F44336" Style="{StaticResource DarkButtonStyle}"
                             IsEnabled="{Binding IsRunning}"
                             Click="StopButton_Click" />
                 </StackPanel>
                 <TextBlock Text="{Binding Status}" FontSize="12" Foreground="#BBBBBB" HorizontalAlignment="Center" />
                 <TextBlock Text="{Binding DetectedSlots}" FontSize="10" Foreground="#888888" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
+                          Width="100" Height="26" FontSize="11" HorizontalAlignment="Center" Margin="0,4,0,0"
+                          Style="{StaticResource DarkComboBoxStyle}" />
             </StackPanel>
         </Border>
     </Grid>

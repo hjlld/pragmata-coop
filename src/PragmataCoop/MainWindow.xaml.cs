@@ -24,11 +24,11 @@ public partial class MainWindow : Window
         _viewModel.StopAll();
     }
 
-    private void BilibiliLogo_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void PromoImage_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {
-            FileName = "https://space.bilibili.com/121034560",
+            FileName = _viewModel.PromoUrl,
             UseShellExecute = true
         });
     }
