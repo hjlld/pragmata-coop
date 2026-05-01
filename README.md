@@ -8,9 +8,15 @@ PRAGMATA is a Capcom game that combines third-person shooting with grid-based pu
 
 You need to install three things on your computer.
 
+> Download ViGEMBus from:  https://github.com/nefarius/ViGEmBus/releases
+
 First, the ViGEmBus driver. Our program needs to create a virtual Xbox 360 controller for the game to recognize, and this driver handles that. You have two ways to install it: download the ViGEmBus installer from its release page and run it, or use the package manager winget by running `winget install Nefarius.ViGEmBus` in a command prompt. Make sure it is installed before launching our application.
 
+> Download HidHide from: https://github.com/nefarius/HidHide/releases
+
 Second, the HidHide driver. This driver hides your physical controllers so the game cannot see them directly. Again, two options: download the installer from its release page, or run `winget install Nefarius.HidHide` in a command prompt. You must restart your computer after installing this one.
+
+> Download .NET 8.0 Desktop Runtime from: https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.26-windows-x64-installer
 
 Third, the .NET 8.0 Desktop Runtime. Our program is written in C# and requires this runtime to execute. Head to Microsoft's official website and download the .NET 8.0 Desktop Runtime. Be sure to pick the desktop version, not the SDK.
 
