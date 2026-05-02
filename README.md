@@ -1,5 +1,9 @@
 # PRAGMATA Co-op Assistant
 
+[If this little program brings you happiness, could you buy me a beer?](https://ko-fi.com/hjlld)
+
+
+
 ## What Is This
 
 PRAGMATA is a Capcom game that combines third-person shooting with grid-based puzzle mini-games. In the puzzle portions, you need to use four directional inputs to navigate a grid. This tool splits those duties between two players: one person handles shooting with the first controller, while the other manages the puzzles with the second controller. The game sees only one virtual controller, yet the inputs from both physical controllers are merged behind the scenes before being sent to it.
