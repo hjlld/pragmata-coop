@@ -8,6 +8,12 @@
 
 PRAGMATA is a Capcom game that combines third-person shooting with grid-based puzzle mini-games. In the puzzle portions, you need to use four directional inputs to navigate a grid. This tool splits those duties between two players: one person handles shooting with the first controller, while the other manages the puzzles with the second controller. The game sees only one virtual controller, yet the inputs from both physical controllers are merged behind the scenes before being sent to it.
 
+## Note
+
+It's strongly recommended using USB cable to connect both controllers. In rare case, especially the third-party brand controllers, wireless connection is under some private protocol, controllers cannot be recognized as standard HID devices, so they cannot be hidden correctly by HidHiden.
+
+PS5 Controller is not supported, because the virtual controller created by ViGEMBus is a XBOX 360 Controller, you will lose all the features of PS5 Controller. If you don't care, you could use some other softwares(like DualSense or DS4Windows) to translate it into a XBOX Controller.
+
 ## Prerequisites
 
 You need to install three things on your computer.
