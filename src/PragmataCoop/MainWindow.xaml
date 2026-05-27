@@ -18,6 +18,7 @@
         <conv:BoolToActiveTextConverter x:Key="BoolToActive" />
         <conv:StickToLeftConverter x:Key="StickToLeft" />
         <conv:StickToTopConverter x:Key="StickToTop" />
+        <conv:NegateBoolConverter x:Key="NegateBool" />
 
         <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
             <Setter Property="Foreground" Value="#E0E0E0" />
@@ -218,6 +219,9 @@
         <!-- Start / Stop + Status -->
         <Border Grid.Row="3" CornerRadius="4" Background="#2D2D2D" Padding="10,8" Margin="0,0,0,0">
             <StackPanel>
+                <CheckBox IsChecked="{Binding HughMainControl}" Foreground="#E0E0E0" FontSize="12"
+                          Content="{Binding L.HughMainControlLabel}" Margin="0,0,0,6"
+                          IsEnabled="{Binding IsRunning, Converter={StaticResource NegateBool}}" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
             <Button Content="{Binding L.ButtonStart}" Width="110" Height="34" Margin="0,0,12,0"
                     Background="#4CAF50" Style="{StaticResource DarkButtonStyle}"

@@ -29,6 +29,7 @@ public class MainViewModel : INotifyPropertyChanged
     private bool _controller2Connected;
     private int _selectedPresetIndex;
     private bool _puzzleModeActive;
+    private bool _hughMainControl;
     private bool _started;
 
     private short _leftStickX1, _leftStickY1, _rightStickX1, _rightStickY1;
@@ -70,6 +71,7 @@ public class MainViewModel : INotifyPropertyChanged
     public bool Controller2Connected { get => _controller2Connected; set { _controller2Connected = value; OnPropertyChanged(); } }
     public bool IsRunning => _started;
     public bool PuzzleModeActive { get => _puzzleModeActive; set { _puzzleModeActive = value; OnPropertyChanged(); } }
+    public bool HughMainControl { get => _hughMainControl; set { _hughMainControl = value; OnPropertyChanged(); } }
     public bool IsStartEnabled => _c1Detected && _c2Detected && !_started;
     public short LeftStickX1 { get => _leftStickX1; set { _leftStickX1 = value; OnPropertyChanged(); } }
     public short LeftStickY1 { get => _leftStickY1; set { _leftStickY1 = value; OnPropertyChanged(); } }
@@ -182,9 +184,9 @@ public class MainViewModel : INotifyPropertyChanged
         {
             if (s1.Connected) { LeftStickX1 = s1.LeftStickX; LeftStickY1 = s1.LeftStickY; RightStickX1 = s1.RightStickX; RightStickY1 = s1.RightStickY; LeftTrigger1 = s1.LeftTrigger; RightTrigger1 = s1.RightTrigger; }
             if (s2.Connected) { RightStickX2 = s2.RightStickX; RightStickY2 = s2.RightStickY; LeftTrigger2 = s2.LeftTrigger; RightTrigger2 = s2.RightTrigger; }
-            _mappingService.IsActivated(s2, out var a); PuzzleModeActive = a;
+            _mappingService.IsActivated(s1, s2, _hughMainControl, out var a); PuzzleModeActive = a;
             if (!_started) return;
-            ApplyVirtualState(_mappingService.Map(s1, s2, CurrentPreset, a));
+            ApplyVirtualState(_mappingService.Map(s1, s2, CurrentPreset, a, _hughMainControl));
         });
     }
 

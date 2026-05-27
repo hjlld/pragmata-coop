@@ -53,6 +53,7 @@ public class Locale : INotifyPropertyChanged
         StatusRunning = _isZh ? "运行中" : "Running";
         DetectNoControllers = _isZh ? "未检测到已连接的手柄" : "No controllers detected";
         XInputSlotPrefix = "XInput #";
+        HughMainControlLabel = _isZh ? "P1主控模式" : "Hugh is the main controller";
     }
 
     public string WindowTitle { get; private set; }
@@ -76,14 +77,27 @@ public class Locale : INotifyPropertyChanged
     public string StatusRunning { get; private set; }
     public string DetectNoControllers { get; private set; }
     public string XInputSlotPrefix { get; private set; }
+    public string HughMainControlLabel { get; private set; }
     public string PromoImage { get; private set; }
     public string PromoUrl { get; private set; }
 
-    public string DetectC1Done(int slot) => _isZh ? $"已识别 ✓ (槽位 {slot})" : $"Detected ✓ (Slot {slot})";
-    public string DetectC2Done(int slot) => _isZh ? $"已识别 ✓ (槽位 {slot})" : $"Detected ✓ (Slot {slot})";
-    public string StatusVigemFail(string msg) => $"ViGEm {(_isZh ? "连接失败" : "connection failed")}: {msg}";
-    public string XInputSlots(string slots) => (_isZh ? "XInput 槽位: [" : "XInput slots: [") + slots + "]";
+    public string DetectC1Done(int slot) => _isZh
+        ? $"手柄1已检测到 (XInput #{slot})"
+        : $"Controller 1 detected on XInput #{slot}";
+
+    public string DetectC2Done(int slot) => _isZh
+        ? $"手柄2已检测到 (XInput #{slot})"
+        : $"Controller 2 detected on XInput #{slot}";
+
+    public string StatusVigemFail(string msg) => _isZh
+        ? $"ViGEm 启动失败: {msg}"
+        : $"ViGEm initialization failed: {msg}";
+
+    public string XInputSlots(string slots) => _isZh
+        ? $"检测到的手柄: {slots}"
+        : $"Detected controllers: {slots}";
 
     private void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+ 
 }

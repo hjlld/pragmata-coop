@@ -11,35 +11,37 @@ public class MappingService
     public void SetThreshold(short threshold) => _threshold = threshold;
     public void SetDeadzone(short deadzone) { } // Reserved for future use
 
-    public bool IsActivated(ControllerState state2, out bool activated)
+    public bool IsActivated(ControllerState state1, ControllerState state2, bool hughMainControl, out bool activated)
     {
-        // Default: check if Controller 2's Left Trigger is pulled beyond half
-        activated = state2.Connected && state2.LeftTrigger > TriggerThreshold;
+        if (hughMainControl)
+            activated = state1.Connected && state1.LeftTrigger > TriggerThreshold;
+        else
+            activated = state2.Connected && state2.LeftTrigger > TriggerThreshold;
         return activated;
     }
 
     public Xbox360VirtualState Map(
         ControllerState state1, ControllerState state2,
-        MappingPreset preset, bool puzzleModeActivated)
+        MappingPreset preset, bool puzzleModeActivated, bool hughMainControl)
     {
         var result = new Xbox360VirtualState();
 
-        if (puzzleModeActivated && state2.Connected)
+        if (puzzleModeActivated && ((hughMainControl && state1.Connected) || state2.Connected))
         {
-            // Player 1's core inputs (sticks, triggers, shoulders, etc.) pass through
             MapPlayer1Core(state1, ref result);
-            // Explicitly zero ABXY — C1's ABXY is suppressed during puzzle mode
             result.A = false; result.B = false; result.X = false; result.Y = false;
-            // C2's LT also maps to virtual LT during puzzle mode (merge with C1's)
-            if (state2.LeftTrigger > result.LeftTrigger)
+            // C2's LT merges during puzzle mode regardless of who activated it
+            if (state2.Connected && state2.LeftTrigger > result.LeftTrigger)
                 result.LeftTrigger = state2.LeftTrigger;
-            // Player 2 takes over ABXY
+            // In Hugh mode, C1's LT triggers puzzle, but C2 still controls ABXY
             MapPlayer2ABXY(state1, state2, preset, ref result);
         }
         else
         {
-            // Full Player 1 control
             MapFullController(state1, ref result);
+            // C2's X always passes through (Diana's clue tracking)
+            if (state2.Connected && state2.X)
+                result.X = true;
         }
 
         return result;
